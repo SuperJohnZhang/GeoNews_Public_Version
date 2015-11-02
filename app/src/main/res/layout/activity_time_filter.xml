@@ -1,0 +1,39 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    tools:context="com.example.superjohn.geonews.TimeFilterActivity">
+
+
+    <TextView
+        android:text="From"
+        android:textSize="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <EditText
+        android:layout_marginTop='30dp'
+        android:id="@+id/StartDateInput"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Start Date(YYYY-MM-DD)"
+        android:inputType="textEmailAddress" />
+    <TextView
+        android:text="to"
+        android:textSize="20dp"
+        android:layout_marginTop="80dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+
+    <EditText
+        android:layout_marginTop='110dp'
+        android:id="@+id/EndDateInput"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="End Date(YYYY-MM-DD)"
+        android:inputType="textEmailAddress" />
+</RelativeLayout>

@@ -1,0 +1,43 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    tools:context="com.example.superjohn.geonews.FilterActivity">
+
+    <Button
+        android:id="@+id/LanguageFilterActivityButton"
+        android:layout_marginTop="0dp"
+        android:layout_marginLeft="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="Language"
+        android:background="@color/wallet_holo_blue_light"
+        android:onClick="setLanguage"
+        />
+
+    <Button
+        android:id="@+id/FieldFilterActivityButton"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="0dp"
+        android:layout_width="400dp"
+        android:layout_height="50dp"
+        android:text="Field"
+        android:background="@color/wallet_holo_blue_light"
+        android:onClick="setField"
+        />
+
+    <Button
+        android:id="@+id/TimeFilterActivityButton"
+        android:layout_marginTop="120dp"
+        android:layout_marginLeft="0dp"
+        android:layout_width="400dp"
+        android:layout_height="50dp"
+        android:text="Time Period"
+        android:background="@color/wallet_holo_blue_light"
+        android:onClick="setTime"
+        />
+</RelativeLayout>

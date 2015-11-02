@@ -1,0 +1,53 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:id="@+id/LanguageFilterActivity"
+    tools:context="com.example.superjohn.geonews.LanguageFilterActivity">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+        <CheckBox android:id="@+id/EnglishLanguageActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="English"
+            android:onClick="TagEnglish"/>
+        <CheckBox android:id="@+id/ChineseLanguageActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chinese"
+            android:onClick="TagChinese"/>
+        <CheckBox android:id="@+id/HindiLanguageActivity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hindi"
+            android:onClick="TagHindi"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/ResetLanguageButton"
+        android:layout_marginTop="400dp"
+        android:layout_marginLeft="0dp"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:text="Reset"
+        android:background="@color/wallet_bright_foreground_holo_dark"
+        android:onClick=""
+        />
+
+    <Button
+        android:id="@+id/ConfirmLanguageButton"
+        android:layout_marginTop="400dp"
+        android:layout_marginLeft="180dp"
+        android:layout_width="160dp"
+        android:layout_height="50dp"
+        android:text="Confirm"
+        android:background="@color/wallet_bright_foreground_holo_dark"
+        android:onClick=""
+        />
+</RelativeLayout>
