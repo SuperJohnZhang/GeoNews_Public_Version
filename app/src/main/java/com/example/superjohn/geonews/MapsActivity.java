@@ -3,7 +3,13 @@ package com.example.superjohn.geonews;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.superjohn.geonews.datastructure.DataUnit;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,24 +25,84 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.superjohn.geonews.datastructure.DataPack;
 import com.example.superjohn.geonews.markerCluster.MyItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.example.superjohn.geonews.elements.CustomSlidingPaneLayout;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapClickListener{
 
     private GoogleMap Map;
+    private SupportMapFragment mapFragment;
     DataPack mDataPack;
+
     // Declare a variable for the cluster manager.
     private ClusterManager<MyItem> mClusterManager;
 
+    // for the slide menu
+    Button mSetting;
+    CustomSlidingPaneLayout mSlidingPanel;
+    SlidingPaneLayout.PanelSlideListener panelListener = new SlidingPaneLayout.PanelSlideListener(){
+        @Override
+        public void onPanelClosed(View arg0) {
+            // TODO Auto-genxxerated method stub
+            getActionBar().setTitle(getString(R.string.app_name));
+        }
+
+        @Override
+        public void onPanelOpened(View arg0) {
+            // TODO Auto-generated method stub
+            getActionBar().setTitle("Menu Titles");
+        }
+
+        @Override
+        public void onPanelSlide(View arg0, float arg1) {
+            // TODO Auto-generated method stub
+
+        }
+    };
+    String [] MenuTitles = new String[]{"Account","Filter","Others"};
+    ListView mMenuList;
+    TextView TitleText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+
+        // now deal with the slide pane
+        mSlidingPanel = (CustomSlidingPaneLayout) findViewById(R.id.root_view);
+        mSetting = (Button) findViewById(R.id.settings);
+        mSetting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!MapsActivity.this.mSlidingPanel.isOpen()) {
+                    MapsActivity.this.mSlidingPanel.openPane();
+                    ((Button)v).setText("Back");
+                }
+                else{
+                    MapsActivity.this.mSlidingPanel.closePane();
+                    ((Button)v).setText("Setting");
+                }
+            }
+        });
+
+        mMenuList = (ListView) findViewById(R.id.MenuList);
+        //appImage = (ImageView)findViewById(android.R.id.home);
+        //TitleText = (TextView)findViewById(android.R.id.title);
+        mMenuList.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1,MenuTitles));
+        //mSlidingPanel.setPanelSlideListener(panelListener);
+        //mSlidingPanel.setParallaxDistance(200);
+
+
+        //getActionBar().setDisplayShowHomeEnabled(true);
+        //getActionBar().setHomeButtonEnabled(true);
+
+
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         Map = mapFragment.getMap();
         mapFragment.getMapAsync(this);
+
+
     }
 
     @Override
@@ -117,6 +183,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             MyItem offsetItem = new MyItem(lat, lng);
             mClusterManager.addItem(offsetItem);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapFragment.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapFragment.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapFragment.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapFragment.onLowMemory();
     }
 
 }
