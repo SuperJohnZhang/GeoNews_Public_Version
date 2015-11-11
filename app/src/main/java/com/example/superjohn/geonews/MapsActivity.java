@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -59,8 +60,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
     };
-    String [] MenuTitles = new String[]{"Account","Filter","Others"};
+    String [] MenuTitles = new String[]{"Account","Filter","Others", "Quit"};
+    String [] OthersOption = new String[]{"About", "Rating", "Back"};
+    String [] AccountOption = new String[]{"Back"};
     ListView mMenuList;
+    ArrayAdapter<String> SlidingPaneContent;
     TextView TitleText;
 
     @Override
@@ -88,7 +92,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMenuList = (ListView) findViewById(R.id.MenuList);
         //appImage = (ImageView)findViewById(android.R.id.home);
         //TitleText = (TextView)findViewById(android.R.id.title);
-        mMenuList.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1,MenuTitles));
+        SlidingPaneContent = new ArrayAdapter(this, android.R.layout.simple_list_item_1,MenuTitles);
+        mMenuList.setAdapter(SlidingPaneContent);
+        mMenuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                // if select account
+                if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[0])){
+                    MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
+                            android.R.layout.simple_list_item_1, MapsActivity.this.AccountOption);
+                    MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
+                }
+
+                // if select filter
+                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[1])){
+
+                }
+
+                // if select Others
+                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[2])){
+                    MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
+                            android.R.layout.simple_list_item_1, MapsActivity.this.OthersOption);
+                    MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
+                }
+
+                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[3])){
+                    MapsActivity.this.finish();
+
+                }
+
+                // back node on others
+                else if((((TextView)view).getText().equals(MapsActivity.this.OthersOption[2]) && position == 2)
+                        || (((TextView)view).getText().equals(MapsActivity.this.AccountOption[0]) && position == 0)){
+                    MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
+                            android.R.layout.simple_list_item_1, MapsActivity.this.MenuTitles);
+                    MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
+                }
+            }
+        });
+        //mMenuList.click
         //mSlidingPanel.setPanelSlideListener(panelListener);
         //mSlidingPanel.setParallaxDistance(200);
 
@@ -188,25 +231,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onResume() {
         super.onResume();
-        mapFragment.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mapFragment.onPause();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapFragment.onDestroy();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        mapFragment.onLowMemory();
     }
 
 }
