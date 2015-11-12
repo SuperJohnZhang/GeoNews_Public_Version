@@ -1,6 +1,7 @@
 package com.example.superjohn.geonews;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
@@ -10,17 +11,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.superjohn.geonews.datastructure.DataUnit;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.example.superjohn.geonews.datastructure.DataPack;
@@ -37,6 +41,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     // Declare a variable for the cluster manager.
     private ClusterManager<MyItem> mClusterManager;
+
+    // for the right panal
+    RelativeLayout mRightPanel;
 
     // for the slide menu
     Button mSetting;
@@ -63,6 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String [] MenuTitles = new String[]{"Account","Filter","Others", "Quit"};
     String [] OthersOption = new String[]{"About", "Rating", "Back"};
     String [] AccountOption = new String[]{"Back"};
+    String [] FilterOption = new String[]{"Field", "Language", "Region", "Time", "Back"};
     ListView mMenuList;
     ArrayAdapter<String> SlidingPaneContent;
     TextView TitleText;
@@ -75,16 +83,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // now deal with the slide pane
         mSlidingPanel = (CustomSlidingPaneLayout) findViewById(R.id.root_view);
         mSetting = (Button) findViewById(R.id.settings);
+        mSetting.setBackgroundColor(Color.TRANSPARENT);
         mSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!MapsActivity.this.mSlidingPanel.isOpen()) {
                     MapsActivity.this.mSlidingPanel.openPane();
-                    ((Button)v).setText("Back");
-                }
-                else{
-                    MapsActivity.this.mSlidingPanel.closePane();
-                    ((Button)v).setText("Setting");
+                    v.setAlpha(0);
                 }
             }
         });
@@ -107,7 +112,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // if select filter
                 else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[1])){
-
+                    MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
+                            android.R.layout.simple_list_item_1, MapsActivity.this.FilterOption);
+                    MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
                 }
 
                 // if select Others
@@ -124,18 +131,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 // back node on others
                 else if((((TextView)view).getText().equals(MapsActivity.this.OthersOption[2]) && position == 2)
-                        || (((TextView)view).getText().equals(MapsActivity.this.AccountOption[0]) && position == 0)){
+                        || (((TextView)view).getText().equals(MapsActivity.this.AccountOption[0]) && position == 0)
+                        || (((TextView)view).getText().equals(MapsActivity.this.FilterOption[4]) && position == 4)){
                     MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
                             android.R.layout.simple_list_item_1, MapsActivity.this.MenuTitles);
                     MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
                 }
             }
         });
+
         //mMenuList.click
         //mSlidingPanel.setPanelSlideListener(panelListener);
         //mSlidingPanel.setParallaxDistance(200);
-
-
         //getActionBar().setDisplayShowHomeEnabled(true);
         //getActionBar().setHomeButtonEnabled(true);
 
@@ -143,9 +150,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         Map = mapFragment.getMap();
+        Map.setOnMapClickListener(this);
+        /*
+        Map.setOnMarkerClickListener(new OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
+                //System.out.println(66666);
+                return false;
+            }
+        });
+        */
         mapFragment.getMapAsync(this);
-
-
     }
 
     @Override
@@ -180,8 +196,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng point) {
-        Map.moveCamera(CameraUpdateFactory.newLatLng(point));
-
+        //Map.moveCamera(CameraUpdateFactory.newLatLng(point));
+        if (MapsActivity.this.mSlidingPanel.isOpen()){
+            MapsActivity.this.mSlidingPanel.closePane();
+        }
     }
 
     public void openFilter(View view){

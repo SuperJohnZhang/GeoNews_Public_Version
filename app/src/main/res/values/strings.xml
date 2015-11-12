@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">GeoNews</string>
-    <string name="title_activity_maps">GeoNews</string>
+    <string name="title_activity_maps">Maps</string>
     <string name="title_activity_filter">Filter</string>
 
     <!-- Strings related to Settings -->
@@ -64,7 +64,7 @@
     <string name="title_activity_language_filter">LanguageFilterActivity</string>
     <string name="title_activity_field_filter">FieldFilterActivity</string>
     <string name="title_activity_time_filter">TimeFilterActivity</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">GeoNews</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
