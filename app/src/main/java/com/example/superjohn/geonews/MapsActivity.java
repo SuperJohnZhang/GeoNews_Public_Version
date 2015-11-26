@@ -2,6 +2,9 @@ package com.example.superjohn.geonews;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
@@ -33,7 +36,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import com.example.superjohn.geonews.elements.CustomSlidingPaneLayout;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        GoogleMap.OnMapClickListener{
+        GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener{
 
     private GoogleMap Map;
     private SupportMapFragment mapFragment;
@@ -192,6 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .setAlpha((float)dt.getPopularity()/10);
         }*/
         this.setUpClusterer();
+        this.goToCurrentLocation();
     }
 
     @Override
@@ -200,6 +204,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (MapsActivity.this.mSlidingPanel.isOpen()){
             MapsActivity.this.mSlidingPanel.closePane();
         }
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
     }
 
     public void openFilter(View view){
@@ -224,7 +233,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         Map.setOnCameraChangeListener(mClusterManager);
-        Map.setOnMarkerClickListener(mClusterManager);
+        Map.setOnMarkerClickListener(this);
 
         // Add cluster items (markers) to the cluster manager.
         addItems();
@@ -246,6 +255,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void goToCurrentLocation(){
+        // Get LocationManager object from System Service LOCATION_SERVICE
+        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        // Create a criteria object to retrieve provider
+        Criteria criteria = new Criteria();
+
+        // Get the name of the best provider
+        String provider = locationManager.getBestProvider(criteria, true);
+
+        // Get Current Location
+        try {
+            Location myLocation = locationManager.getLastKnownLocation(provider);
+            for(int i=0; i<100; i++) {
+                myLocation = locationManager.getLastKnownLocation(provider);
+            }
+            // Get latitude of the current location
+            double latitude = myLocation.getLatitude();
+
+            // Get longitude of the current location
+            double longitude = myLocation.getLongitude();
+
+            // Create a LatLng object for the current location
+            LatLng latLng = new LatLng(latitude, longitude);
+
+            // Show the current location in Google Map
+            Map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        }catch (SecurityException e){
+            System.out.println("That's gg");
+            e.printStackTrace();
+        }
+
+        // Zoom in the Google Map
+        Map.animateCamera(CameraUpdateFactory.zoomTo(20));
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -265,5 +310,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLowMemory() {
         super.onLowMemory();
     }
-
 }
