@@ -8,6 +8,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,6 +19,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.superjohn.geonews.datastructure.DataUnit;
+import com.example.superjohn.geonews.elements.CustomedInfoWindowAdapter;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -193,6 +195,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }*/
         this.setUpClusterer();
 
+        // set up the layout of infoWindow
+        this.setUpInfoWindow();
+
         // get to the current location
         map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
 
@@ -238,6 +243,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void initTestData(int num){
         mDataPack = new DataPack(num);
     }
+
+    private void setUpInfoWindow(){
+        LayoutInflater inflater = (LayoutInflater) this.getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+        CustomedInfoWindowAdapter cuswin = new CustomedInfoWindowAdapter(inflater);
+        Map.setInfoWindowAdapter(cuswin);
+    }
+
 
     private void setUpClusterer() {
 
