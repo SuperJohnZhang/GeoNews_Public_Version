@@ -35,6 +35,8 @@ import com.example.superjohn.geonews.markerCluster.MyItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.example.superjohn.geonews.elements.CustomSlidingPaneLayout;
 
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener{
 
@@ -82,6 +84,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        // assume the database is added at this part
+
+        //List<DataUnit> data;
+        // then deal with the data
+
+
+
 
         // now deal with the slide pane
         mSlidingPanel = (CustomSlidingPaneLayout) findViewById(R.id.root_view);
@@ -90,7 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!MapsActivity.this.mSlidingPanel.isOpen()) {
+                if (!MapsActivity.this.mSlidingPanel.isOpen()) {
                     MapsActivity.this.mSlidingPanel.openPane();
                     v.setAlpha(0);
                 }
@@ -107,35 +116,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 // if select account
-                if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[0])){
+                if (((TextView) view).getText().equals(MapsActivity.this.MenuTitles[0])) {
                     MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
                             android.R.layout.simple_list_item_1, MapsActivity.this.AccountOption);
                     MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
                 }
 
                 // if select filter
-                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[1])){
+                else if (((TextView) view).getText().equals(MapsActivity.this.MenuTitles[1])) {
                     MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
                             android.R.layout.simple_list_item_1, MapsActivity.this.FilterOption);
                     MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
                 }
 
                 // if select Others
-                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[2])){
+                else if (((TextView) view).getText().equals(MapsActivity.this.MenuTitles[2])) {
                     MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
                             android.R.layout.simple_list_item_1, MapsActivity.this.OthersOption);
                     MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
-                }
-
-                else if(((TextView)view).getText().equals(MapsActivity.this.MenuTitles[3])){
+                } else if (((TextView) view).getText().equals(MapsActivity.this.MenuTitles[3])) {
                     MapsActivity.this.finish();
 
                 }
 
                 // back node on others
-                else if((((TextView)view).getText().equals(MapsActivity.this.OthersOption[2]) && position == 2)
-                        || (((TextView)view).getText().equals(MapsActivity.this.AccountOption[0]) && position == 0)
-                        || (((TextView)view).getText().equals(MapsActivity.this.FilterOption[4]) && position == 4)){
+                else if ((((TextView) view).getText().equals(MapsActivity.this.OthersOption[2]) && position == 2)
+                        || (((TextView) view).getText().equals(MapsActivity.this.AccountOption[0]) && position == 0)
+                        || (((TextView) view).getText().equals(MapsActivity.this.FilterOption[4]) && position == 4)) {
                     MapsActivity.this.SlidingPaneContent = new ArrayAdapter<String>(MapsActivity.this,
                             android.R.layout.simple_list_item_1, MapsActivity.this.MenuTitles);
                     MapsActivity.this.mMenuList.setAdapter(MapsActivity.this.SlidingPaneContent);
@@ -154,16 +161,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         Map = mapFragment.getMap();
         Map.setOnMapClickListener(this);
-        /*
-        Map.setOnMarkerClickListener(new OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                marker.showInfoWindow();
-                //System.out.println(66666);
-                return false;
-            }
-        });
-        */
         mapFragment.getMapAsync(this);
     }
 
@@ -195,7 +192,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .setAlpha((float)dt.getPopularity()/10);
         }*/
         this.setUpClusterer();
-        this.goToCurrentLocation();
+
+        // get to the current location
+        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+
+            private boolean state = true;
+
+            @Override
+            public void onMyLocationChange(Location location) {
+                if (state == true) {
+                    LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+                    if (MapsActivity.this.Map != null) {
+                        MapsActivity.this.Map.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
+                        state = false;
+                    }
+                }
+            }
+        });
+
+
     }
 
     @Override
@@ -208,7 +223,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return false;
+        marker.setTitle("test");
+        marker.setSnippet("this is a test");
+        marker.showInfoWindow();
+        System.out.println("666666");
+        return true;                                // if returen true, the default event will not occur
     }
 
     public void openFilter(View view){
@@ -233,7 +252,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         Map.setOnCameraChangeListener(mClusterManager);
-        Map.setOnMarkerClickListener(this);
+        Map.setOnMarkerClickListener(MapsActivity.this);
 
         // Add cluster items (markers) to the cluster manager.
         addItems();
@@ -253,42 +272,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             MyItem offsetItem = new MyItem(lat, lng);
             mClusterManager.addItem(offsetItem);
         }
-    }
-
-    private void goToCurrentLocation(){
-        // Get LocationManager object from System Service LOCATION_SERVICE
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-        // Create a criteria object to retrieve provider
-        Criteria criteria = new Criteria();
-
-        // Get the name of the best provider
-        String provider = locationManager.getBestProvider(criteria, true);
-
-        // Get Current Location
-        try {
-            Location myLocation = locationManager.getLastKnownLocation(provider);
-            for(int i=0; i<100; i++) {
-                myLocation = locationManager.getLastKnownLocation(provider);
-            }
-            // Get latitude of the current location
-            double latitude = myLocation.getLatitude();
-
-            // Get longitude of the current location
-            double longitude = myLocation.getLongitude();
-
-            // Create a LatLng object for the current location
-            LatLng latLng = new LatLng(latitude, longitude);
-
-            // Show the current location in Google Map
-            Map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        }catch (SecurityException e){
-            System.out.println("That's gg");
-            e.printStackTrace();
-        }
-
-        // Zoom in the Google Map
-        Map.animateCamera(CameraUpdateFactory.zoomTo(20));
     }
 
     @Override
