@@ -1,5 +1,6 @@
 package com.example.superjohn.geonews.datastructure;
 
+import java.sql.Timestamp;
 import java.util.Random;
 
 /**
@@ -15,7 +16,8 @@ public class DataUnit {
 
     private String title;
     private String location;
-    private String date;
+    private String imageUrl;
+    private Timestamp date;
     private String content;
     private String link;
     private int popularity;             // popularity varies from 1-10
@@ -35,7 +37,7 @@ public class DataUnit {
     public DataUnit(String[] strings){
         title = strings[1];
         location = strings[2];
-        date = strings[3];
+        date = new Timestamp(0);
         content = strings[4];
         link = strings[5];
         popularity = Integer.parseInt(strings[6]);
@@ -49,7 +51,7 @@ public class DataUnit {
     public String getLocation(){
         return location;
     };
-    public String getDate(){
+    public Timestamp getDate(){
         return date;
     };
     public String getContent(){

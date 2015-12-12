@@ -1,5 +1,6 @@
 package com.example.superjohn.geonews;
 
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Criteria;
@@ -8,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SlidingPaneLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,6 +22,11 @@ import android.widget.TextView;
 
 import com.example.superjohn.geonews.datastructure.DataUnit;
 import com.example.superjohn.geonews.elements.CustomedInfoWindowAdapter;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
@@ -37,7 +44,12 @@ import com.example.superjohn.geonews.markerCluster.MyItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.example.superjohn.geonews.elements.CustomSlidingPaneLayout;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapClickListener, GoogleMap.OnMarkerClickListener{
@@ -45,6 +57,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap Map;
     private SupportMapFragment mapFragment;
     DataPack mDataPack;
+
+    // the database
+    private static final String FIREBASE_URL = "https://geonews.firebaseio.com/";
+    private Firebase mFirebaseRef;
+    private ArrayList<DataUnit> GeoNews_Data;
+    private Class<DataUnit> DataUnitModel;
+
+    // the map use marker as key and use mydataobj as pivot
+    private HashMap<LatLng, DataUnit> allMarkersData = new HashMap<LatLng, DataUnit>();
+
 
     // Declare a variable for the cluster manager.
     private ClusterManager<MyItem> mClusterManager;
@@ -89,7 +111,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // assume the database is added at this part
 
         //List<DataUnit> data;
-        // then deal with the data
+        //Set up the REST API
+        Firebase.setAndroidContext(this);
+        mFirebaseRef=new Firebase(FIREBASE_URL).child("BBCnews");
+        GeoNews_Data=new ArrayList<>();
+        DataUnitModel=DataUnit.class;
+        Query mRef= mFirebaseRef.orderByChild("popularity").limitToFirst(200);
+        mRef.addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                HashMap my_outer_map= (HashMap)snapshot.getValue();
+                Iterator map_iterator = my_outer_map.keySet().iterator();
+                HashMap my_inner_map;
+                while(map_iterator.hasNext()) {
+                    my_inner_map = (HashMap) my_outer_map.get(map_iterator.next().toString());
+                    String title=my_inner_map.get("title").toString();
+                    String location= my_inner_map.get("location").toString();
+                    String date=my_inner_map.get("location").toString();
+                    String content=my_inner_map.get("location").toString();
+                    String link=my_inner_map.get("link").toString();
+                    String popularity=my_inner_map.get("popularity").toString();
+                    String[] strings={"begin",title,location,date,content,link,popularity};
+                    DataUnit piece_of_new=new DataUnit(strings);
+                    GeoNews_Data.add(piece_of_new);
+                    //Log.e("The title is ", my_inner_map.get("title").toString());
+                    //Log.e("The location is ",my_inner_map.get("location").toString());
+                    //Log.e("The content is ", my_inner_map.get("content").toString());
+                }
+
+                int size= GeoNews_Data.size();
+                Log.e("GeoNews_Data have ", String.valueOf(size));
+
+                System.out.println(size+"apple");
+
+                for (int i=0; i<size; ++i){
+                    DataUnit temp_data=GeoNews_Data.get(i);
+                    Log.e("The title is ", temp_data.getTitle());
+                    Log.e("The location is ",temp_data.getLocation());
+                    Log.e("The content is ", temp_data.getContent());
+                }
+
+                // set up the cluster when the data is changed
+                MapsActivity.this.setUpClusterer();
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                System.out.println("The read failed: " + firebaseError.getMessage());
+            }
+        });
+
+
+        // then deal with the data ---- do that after talk
 
 
 
@@ -193,7 +267,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .snippet(dt.getContent() + "\n" + dt.getLocation() + "\n"))
                     .setAlpha((float)dt.getPopularity()/10);
         }*/
-        this.setUpClusterer();
+        //this.setUpClusterer();
 
         // set up the layout of infoWindow
         this.setUpInfoWindow();
@@ -228,10 +302,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        marker.setTitle("test");
+        //marker.setTitle("test");
         marker.setSnippet("this is a test");
         marker.showInfoWindow();
-        System.out.println("666666");
+        //System.out.println("666666");
         return true;                                // if returen true, the default event will not occur
     }
 
@@ -246,7 +320,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void setUpInfoWindow(){
         LayoutInflater inflater = (LayoutInflater) this.getApplicationContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-        CustomedInfoWindowAdapter cuswin = new CustomedInfoWindowAdapter(inflater);
+        CustomedInfoWindowAdapter cuswin = new CustomedInfoWindowAdapter(inflater, allMarkersData);
         Map.setInfoWindowAdapter(cuswin);
     }
 
@@ -255,7 +329,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         // Position the map.
-        Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(51.503186, -0.126446), 10));
+        //Map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(51.503186, -0.126446), 10));
 
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
@@ -270,21 +344,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addItems();
     }
 
+
+
     private void addItems() {
+        int dataIndex = 1;
 
         // Set some lat/lng coordinates to start with.
         double lat = 51.5145160;
         double lng = -0.1270060;
 
         // Add ten cluster items in close proximity, for purposes of this example.
+        while(GeoNews_Data.isEmpty()){
+
+        }
         for (int i = 0; i < 10; i++) {
             double offset = i / 60d;
             lat = lat + offset;
             lng = lng + offset;
             MyItem offsetItem = new MyItem(lat, lng);
             mClusterManager.addItem(offsetItem);
+            try {
+                System.out.println(GeoNews_Data.get(i).getTitle());
+                allMarkersData.put(offsetItem.getPosition(), GeoNews_Data.get(i));
+            }catch (IndexOutOfBoundsException e){
+                System.out.println("太快了");
+                allMarkersData.put(offsetItem.getPosition(),new DataUnit());
+            }
+
         }
+
     }
+
+    /*
+    private void setMarkerData(){
+        Collection<Marker> allMarkers = mClusterManager.getClusterMarkerCollection().getMarkers();
+        int i=0;
+        for(Marker m: allMarkers){
+            try {
+                allMarkersData.put(m, GeoNews_Data.get(i));
+            }catch (IndexOutOfBoundsException e){
+                allMarkersData.put(m,new DataUnit());
+            }
+            i++;
+        }
+
+    }
+    */
 
     @Override
     public void onResume() {
